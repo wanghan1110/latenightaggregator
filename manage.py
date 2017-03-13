@@ -1,17 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import tornado
-from tornado import autoreload
-from tornado.wsgi import WSGIContainer
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-from tornado.log import enable_pretty_logging
+from flask_script import Manager
 from application import app
+manager = Manager(app)
 
-enable_pretty_logging()
+if __name__ == "__main__":
+    manager.run()
 
-PORT = 5000
+# PORT = 5000
 
 # ------- PRODUCTION CONFIG -------
 # http_server = HTTPServer(WSGIContainer(app))
@@ -23,4 +20,4 @@ PORT = 5000
 
 
 # ------- DEVELOPMENT CONFIG -------
-app.run(port=PORT, debug=True)
+# app.run(port=PORT, debug=True)
