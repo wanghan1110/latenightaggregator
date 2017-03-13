@@ -1,15 +1,18 @@
 import sendgrid
 from flask import request, render_template, flash, current_app, jsonify
-from application import app, logger, cache, agg
+from application import app, logger, cache, agg, mongo
 from application.decorators import threaded_async
 # from application.models import *
 from forms import *
 from time import time
 from aggregator import YTOptions
 from collections import OrderedDict
+import pymongo
+import datetime
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+@cache.cached(timeout=3600)
 def index():
     channels=current_app.config['CHANNELIDS']
     vinfos=OrderedDict()
@@ -19,27 +22,19 @@ def index():
                           publishedAfter=agg.get_current_datestring()
         )
         vinfos.update(agg.retrive_youtube_updates(options))
+    log_video_stats(vinfos)
     return render_template("index.html", vinfos=vinfos)
 
-
-@app.route('/add_record', methods=['GET', 'POST'])
-def add_record():
-    form = Form_Record_Add(request.form)
-
-    if request.method == 'POST':
-        if form.validate():
-            new_record = SampleTable()
-
-            title = form.title.data
-            description = form.description.data
-
-            new_record.add_data(title, description)
-            logger.info("Adding a new record.")
-            flash("Record added successfully.", category="success")
-
-    return render_template("add_record.html", form=form)
-
-
+def log_video_stats(vinfos):
+    for vid, vname in vinfos.iteritems():
+        item = {"_id": vid,
+                "video_name": vname,
+                "date": datetime.datetime.today()}
+        try:
+            mongo.db.stats.insert_one(item)
+        except pymongo.errors.DuplicateKeyError:
+            pass
+    
 @threaded_async
 def send_email(app, to, subject, body):
     with app.app_context():
@@ -76,53 +71,6 @@ def contact():
         email_sent = True
 
     return render_template("contact.html", RECAPTCHA_SITE_KEY=recaptcha, email_sent=email_sent)
-
-
-# ----- UTILS. Delete them if you don't plan to use them -----
-
-@app.route('/cache_true')
-@cache.cached(timeout=120)
-def cached_examples():
-    start = time()
-    records = SampleTable().benchmark_searchspeed()
-    return jsonify(data=records, cached_at=datetime.datetime.now(), done_in=time() - start)
-
-
-@app.route('/cache_false')
-def not_cached_examples():
-    start = time()
-    records = SampleTable().benchmark_searchspeed()
-    return jsonify(result=records, cached_at=datetime.datetime.now(), done_in=time() - start)
-
-
-@app.route('/fill_db')
-def fill_db():
-    # ---- it might take some time ----
-
-    from random import choice
-    from string import printable
-    import humanize
-    import os
-    start = time()
-    lis = list(printable)
-    for i in range(0, 50000):
-        title = ''.join(choice(lis) for _ in xrange(5))
-        description = ''.join(choice(lis) for _ in xrange(200))
-        SampleTable().add_data(title, description)
-
-    return "done in %.3f  | database size: %s" % (time() - start, humanize.naturalsize(os.path.getsize("db.sqlite")))
-
-
-@app.route('/get_user/<int:userId>')
-def get_user(userId=0):
-    result = SampleTable().get_id(userId)
-    return jsonify(data=result)
-
-
-# @app.before_first_request
-# def before_first_request():
-#     logger.info("-------------------- initializing everything ---------------------")
-#     db.create_all()
 
 
 @app.errorhandler(404)

@@ -31,20 +31,18 @@ class Config(object):
                 'UC3XTzVzaHQEd30rQbuvCtTQ',
                 'UCVTyTA7-g9nopHeHbeuvpRA'
     ]
-
+    
+    MONGO_HOST=os.environ.get('MONGO_HOST')
+    MONGO_PORT=os.environ.get('MONGO_PORT')
+    MONGO_DBNAME=os.environ.get('MONGO_DBNAME')
+    MONGO_USERNAME=os.environ.get('MONGO_USERNAME')
+    MONGO_PASSWORD=os.environ.get('MONGO_PASSWORD')
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI_TEMPLATE = 'mysql://{}:{}@server_ip:server_port/{}'
     DEBUG = False
 
-
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI_TEMPLATE = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
-    SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
     DEBUG = True
 
-
 class TestingConfig(Config):
-    SQLALCHEMY_DATABASE_URI_TEMPLATE = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
-    SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
     TESTING = True

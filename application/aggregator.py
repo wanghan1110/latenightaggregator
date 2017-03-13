@@ -47,7 +47,7 @@ class Aggregator(object):
                 vname=search_result["snippet"]["title"].encode('utf-8')
                 vid=search_result["id"]["videoId"]
                 print "Video: {} {}".format(vname, vid)
-                vinfos[vname]=vid
+                vinfos[vid]=vname
         return vinfos
 
 
