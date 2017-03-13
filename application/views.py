@@ -2,7 +2,7 @@ import sendgrid
 from flask import request, render_template, flash, current_app, jsonify
 from application import app, logger, cache, agg
 from application.decorators import threaded_async
-from application.models import *
+# from application.models import *
 from forms import *
 from time import time
 from aggregator import YTOptions
@@ -119,10 +119,10 @@ def get_user(userId=0):
     return jsonify(data=result)
 
 
-@app.before_first_request
-def before_first_request():
-    logger.info("-------------------- initializing everything ---------------------")
-    db.create_all()
+# @app.before_first_request
+# def before_first_request():
+#     logger.info("-------------------- initializing everything ---------------------")
+#     db.create_all()
 
 
 @app.errorhandler(404)
