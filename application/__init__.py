@@ -13,10 +13,10 @@ app.config['SQLALCHEMY_DATABASE_URI']=app.config['SQLALCHEMY_DATABASE_URI_TEMPLA
                                                                                             app.config['SQLALCHEMY_DATABASE_PASSWORD'],
                                                                                             app.config['SQLALCHEMY_DATABASE_DB_NAME'])
 
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
 
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-cache.init_app(app)
+# cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+# cache.init_app(app)
 
 agg = Aggregator()
 
